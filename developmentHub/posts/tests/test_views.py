@@ -1,8 +1,9 @@
+from django.contrib import auth
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from ..models import Post, Group
+from ..models import Post, Group, Follow
 
 class ViewsTest(TestCase):
     @classmethod
@@ -56,7 +57,35 @@ class ViewsTest(TestCase):
             with self.subTest(url = url):
                 response = self.guest_client.get(url)
                 page = response.context.get('page')   
-                print("---->>>", page, url)  
                 self.assertEqual(page[0].text, "Текст тестовой статьи") 
                 self.assertEqual(page[0].author, self.user)   
                 self.assertEqual(page[0].group, self.group)    
+
+class FollowTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user1 = get_user_model().objects.create(username = "test-user1")
+        cls.user2 = get_user_model().objects.create(username = "test-user2")
+
+    def setUp(self):
+        self.authorized_client1 = Client()
+        self.authorized_client1.force_login(self.user1)
+        self.authorized_client2 = Client()
+        self.authorized_client2.force_login(self.user2)
+
+    def test_user_subscribes(self):
+        """Authorised user can subscribe to author"""
+        params = {
+            "username": self.user1.username,
+        }
+        self.authorized_client2.get(reverse('profile_follow', kwargs=params))
+        self.assertTrue(Follow.objects.filter(author=self.user1, user=self.user2).exists())
+    def test_user_unsubscride(self):
+        """Authorised user can unsubscribe from author"""
+        Follow.objects.create(author=self.user1, user=self.user2)
+        params = {
+            "username": self.user1.username,
+        }
+        self.authorized_client2.get(reverse('profile_unfollow', kwargs=params))
+        self.assertFalse(Follow.objects.filter(author=self.user1, user=self.user2).exists())

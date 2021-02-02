@@ -68,6 +68,6 @@ class URLTests(TestCase):
     #     self.assertEqual(response.status_code, 200)
     # def test_technology(self):
     #     """Checks url for technologies page. Status code should be 200."""  
-    #     response = self.guest_client.get('/technology/')
+    #     response = self.guest_client.get('/tech/')
     #     self.assertEqual(response.status_code, 200)
 

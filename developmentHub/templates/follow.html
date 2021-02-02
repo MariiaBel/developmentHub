@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Последние обновления на сайте{% endblock %}
-{% block header %}Последние обновления на сайте{% endblock %}
+{% block title %}Статьи избранных авторов{% endblock %}
+{% block header %}Статьи избранных авторов{% endblock %}
 {% block content %}
     <div class="card">
     <div class="card-body">
@@ -14,7 +14,10 @@
     </div>
 
     <div class="container">
-        {% include "includes/menu.html" with index=True %}
+        {% include "includes/menu.html" with follow=True %}
+        {% if post_count == 0 %}
+            <p>Вы не подписаны на авторов постов.</p>
+        {% endif %}
         {% load cache %}
             {% cache 20 index_page page %}
                 {% for post in page %}
